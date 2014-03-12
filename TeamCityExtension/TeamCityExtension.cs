@@ -12,8 +12,6 @@ namespace TeamCityExtension
 
         public TeamCityExtension()
         {
-        //    //var url = "https://vm-dev-01.cloudapp.net/teamcity/httpAuth/feed.html?buildTypeId=EmpowerUi_Continuous&buildTypeId=MedseekApi_Continuous&itemsType=builds&buildStatus=successful&buildStatus=failed&userKey=feed";
-        //    //Configuration = new BuildServer(url);
             DisplayName = "Team City";
         }
 
