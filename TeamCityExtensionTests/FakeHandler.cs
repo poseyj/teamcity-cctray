@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace UnitTestProject1
+namespace TeamCityExtensionTests
 {
     public class FakeHandler : DelegatingHandler
     {

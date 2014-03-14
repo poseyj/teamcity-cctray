@@ -1,6 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace UnitTestProject1
+namespace TeamCityExtensionTests
 {
     [TestClass]
     public class TeamCityExtensionTests

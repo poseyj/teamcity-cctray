@@ -6,8 +6,8 @@
     <ProjectGuid>{9CFFCCA7-3D79-47B2-81D9-19B177E50BB6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>UnitTestProject1</RootNamespace>
-    <AssemblyName>UnitTestProject1</AssemblyName>
+    <RootNamespace>TeamCityExtensionTests</RootNamespace>
+    <AssemblyName>TeamCityExtensionTests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -35,11 +35,21 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="log4net">
+      <HintPath>..\TeamCityExtension\lib\log4net.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="SirenOfShame.Lib">
+      <HintPath>..\TeamCityExtension\lib\SirenOfShame.Lib.dll</HintPath>
+    </Reference>
+    <Reference Include="SoxLib">
+      <HintPath>..\TeamCityExtension\lib\SoxLib.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="ThoughtWorks.CruiseControl.CCTrayLib, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -47,6 +57,9 @@
     </Reference>
     <Reference Include="ThoughtWorks.CruiseControl.Remote">
       <HintPath>..\TeamCityExtension\lib\ThoughtWorks.CruiseControl.Remote.dll</HintPath>
+    </Reference>
+    <Reference Include="UsbLib">
+      <HintPath>..\TeamCityExtension\lib\UsbLib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Choose>
@@ -66,6 +79,7 @@
     <Compile Include="TeamCityExtensionTests.cs" />
     <Compile Include="TeamCityManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SirenOfShameIntegrationTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

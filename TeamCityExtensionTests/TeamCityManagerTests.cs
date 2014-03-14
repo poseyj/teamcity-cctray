@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Net;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Http;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using TeamCityExtension;
 using ThoughtWorks.CruiseControl.CCTrayLib.Configuration;
 using ThoughtWorks.CruiseControl.Remote;
 
-namespace UnitTestProject1
+namespace TeamCityExtensionTests
 {
     [TestClass]
     public class TeamCityManagerTests
