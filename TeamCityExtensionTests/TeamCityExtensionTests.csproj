@@ -41,6 +41,9 @@
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Rhino.Mocks">
+      <HintPath>lib\Rhino.Mocks.dll</HintPath>
+    </Reference>
     <Reference Include="SirenOfShame.Lib">
       <HintPath>..\TeamCityExtension\lib\SirenOfShame.Lib.dll</HintPath>
     </Reference>

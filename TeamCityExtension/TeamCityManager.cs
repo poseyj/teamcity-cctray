@@ -12,19 +12,18 @@ namespace TeamCityExtension
 {
     public class TeamCityManager : ICruiseServerManager
     {
-        private readonly HttpClient httpClient;
+        private readonly HttpClient _httpClient;
+        //private readonly ISirenOfShameManager _sosManager;
 
-        public TeamCityManager(BuildServer buildServer)
+        public TeamCityManager(BuildServer buildServer) : this(buildServer, new HttpClient())
         {
-            httpClient = new HttpClient();
-            DisplayName = "TeamCityManager";
-            Configuration = buildServer;
         }
 
         public TeamCityManager(BuildServer buildServer, HttpClient httpClient)
         {
-            this.httpClient = httpClient;
+            DisplayName = "TeamCityManager";
             Configuration = buildServer;
+            _httpClient = httpClient;
         }
 
         public string DisplayName { get; private set; }
@@ -70,7 +69,24 @@ namespace TeamCityExtension
             {
                 ProjectStatuses = projectStatuses.ToArray()
             };
+
+            ManageSiren(projectStatuses);
             return snapshot;
+        }
+
+        private void ManageSiren(IEnumerable<ProjectStatus> projectStatuses)
+        {
+            if (projectStatuses.Count(x => x.Activity == ProjectActivity.Building) > 0)
+            {
+                //_sosManager.Building();
+                return;
+            }
+
+            if (projectStatuses.Count(x => x.BuildStatus == IntegrationStatus.Failure) == 0)
+            {
+                //_sosManager.AllBuildsGood();
+            }
+
         }
 
         private SortedDictionary<string, TcBuild> GetBuildList()
@@ -132,8 +148,8 @@ namespace TeamCityExtension
 
         private string MakeRequest(string url)
         {
-            httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var response = httpClient.GetAsync(url).Result;
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            var response = _httpClient.GetAsync(url).Result;
             var result = response.Content.ReadAsStringAsync().Result;
             return result;
         }
