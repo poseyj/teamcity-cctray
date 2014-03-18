@@ -6,7 +6,7 @@ using SirenOfShame.Lib.Helpers;
 
 namespace TeamCityExtensionTests
 {
-    [TestClass]
+    [TestClass, Ignore]
     public class SirenOfShameIntegrationTests
     {
         [TestMethod]

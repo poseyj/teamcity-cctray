@@ -27,7 +27,7 @@ namespace TeamCityExtensionTests
                                    "'build': [{" +
                                    "'id': 2052," +
                                    "'number': '811'," +
-                                   "'status': 'FAILURE'," +
+                                   "'status': 'SUCCESS'," +
                                    "'buildTypeId': 'TestApi_Continuous'," +
                                    "'branchName': 'feature/auth'," +
                                    "'startDate': '20140312T170452+0000'," +
@@ -47,9 +47,9 @@ namespace TeamCityExtensionTests
             responses.Push(response2);
             var httpClient = BuildHttpClient(responses);
 
-            //var sosManager = new SirenOfShameManager(mockSiren);
+            var sosManager = new SirenOfShameManager(mockSiren);
 
-            var client = new TeamCityManager(new BuildServer(baseUrl), httpClient);//, sosManager);
+            var client = new TeamCityManager(new BuildServer(baseUrl), httpClient, sosManager);
             var result = client.GetCruiseServerSnapshot();
 
             Assert.AreEqual(ProjectActivity.Sleeping, result.ProjectStatuses[0].Activity);
@@ -100,9 +100,9 @@ namespace TeamCityExtensionTests
             responses.Push(response2);
             var httpClient = BuildHttpClient(responses);
 
-            //var sosManager = new SirenOfShameManager(mockSiren);
+            var sosManager = new SirenOfShameManager(mockSiren);
 
-            var client = new TeamCityManager(new BuildServer(baseUrl), httpClient);//, sosManager);
+            var client = new TeamCityManager(new BuildServer(baseUrl), httpClient, sosManager);
             var result = client.GetCruiseServerSnapshot();
 
             Assert.AreEqual(ProjectActivity.Building, result.ProjectStatuses[0].Activity);

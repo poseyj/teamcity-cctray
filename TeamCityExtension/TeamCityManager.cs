@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using SirenOfShame.Lib.Device;
 using ThoughtWorks.CruiseControl.CCTrayLib.Configuration;
 using ThoughtWorks.CruiseControl.CCTrayLib.Monitoring;
 using ThoughtWorks.CruiseControl.Remote;
@@ -13,17 +14,23 @@ namespace TeamCityExtension
     public class TeamCityManager : ICruiseServerManager
     {
         private readonly HttpClient _httpClient;
-        //private readonly ISirenOfShameManager _sosManager;
+        private readonly ISirenOfShameManager _sosManager;
 
-        public TeamCityManager(BuildServer buildServer) : this(buildServer, new HttpClient())
+        public TeamCityManager(BuildServer buildServer) : this(buildServer, new HttpClient(), new SirenOfShameManager(new SirenOfShameDevice()))
         {
         }
 
-        public TeamCityManager(BuildServer buildServer, HttpClient httpClient)
+        public TeamCityManager(BuildServer buildServer, HttpClient httpClient) : this(buildServer, httpClient, new SirenOfShameManager(new SirenOfShameDevice()))
+        {
+        }
+
+        public TeamCityManager(BuildServer buildServer, HttpClient httpClient, ISirenOfShameManager sosManager)
         {
             DisplayName = "TeamCityManager";
             Configuration = buildServer;
+            _sosManager = sosManager;
             _httpClient = httpClient;
+            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
 
         public string DisplayName { get; private set; }
@@ -78,15 +85,21 @@ namespace TeamCityExtension
         {
             if (projectStatuses.Count(x => x.Activity == ProjectActivity.Building) > 0)
             {
-                //_sosManager.Building();
+                _sosManager.Building();
                 return;
             }
 
             if (projectStatuses.Count(x => x.BuildStatus == IntegrationStatus.Failure) == 0)
             {
-                //_sosManager.AllBuildsGood();
+                _sosManager.AllBuildsGood();
+                return;
             }
 
+            if (projectStatuses.Count(x => x.BuildStatus == IntegrationStatus.Failure) > 0)
+            {
+                _sosManager.FailedBuild();
+                return;
+            }
         }
 
         private SortedDictionary<string, TcBuild> GetBuildList()
@@ -130,6 +143,11 @@ namespace TeamCityExtension
             var buildResponse = JsonConvert.DeserializeObject<TcBuildResponse>(result);
 
             var currentlyExecutingBuilds = new SortedDictionary<string, TcBuild>();
+            if (buildResponse.count <= 0)
+            {
+                return currentlyExecutingBuilds;
+            }
+
             foreach (var build in buildResponse.build)
             {
                 var key = string.Format("{0}-[{1}]", build.buildTypeId, build.branchName);
@@ -148,7 +166,6 @@ namespace TeamCityExtension
 
         private string MakeRequest(string url)
         {
-            _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             var response = _httpClient.GetAsync(url).Result;
             var result = response.Content.ReadAsStringAsync().Result;
             return result;
