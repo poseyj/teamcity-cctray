@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Linq;
 using Newtonsoft.Json;
 using System;
@@ -15,6 +16,7 @@ namespace TeamCityExtension
     {
         private readonly HttpClient _httpClient;
         private readonly ISirenOfShameManager _sosManager;
+        private readonly ArrayList _currentProjects = new ArrayList();
 
         public TeamCityManager(BuildServer buildServer) : this(buildServer, new HttpClient(), new SirenOfShameManager(new SirenOfShameDevice()))
         {
@@ -81,8 +83,10 @@ namespace TeamCityExtension
             return snapshot;
         }
 
-        private void ManageSiren(IEnumerable<ProjectStatus> projectStatuses)
+        private void ManageSiren(IList<ProjectStatus> projectStatuses)
         {
+            var failingProjects = projectStatuses.Where(x => x.BuildStatus == IntegrationStatus.Failure);
+
             if (projectStatuses.Count(x => x.Activity == ProjectActivity.Building) > 0)
             {
                 _sosManager.Building();
@@ -104,7 +108,7 @@ namespace TeamCityExtension
 
         private SortedDictionary<string, TcBuild> GetBuildList()
         {
-            var url = BuildFullUrl("/guestAuth/app/rest/builds?locator=branch:(default:any)");
+            var url = BuildFullUrl("/guestAuth/app/rest/builds?locator=branch:(default:any),count:300");
             var result = MakeRequest(url);
             var buildResponse = JsonConvert.DeserializeObject<TcBuildResponse>(result);
 
@@ -112,6 +116,11 @@ namespace TeamCityExtension
             foreach (var build in buildResponse.build)
             {
                 var key = string.Format("{0}-[{1}]", build.buildTypeId, build.branchName);
+
+                // if not in our list of currently monitored builds then skip it
+                if(!_currentProjects.Contains(key))
+                    continue;
+
                 if (!buildList.ContainsKey(key))
                 {
                     buildList.Add(key, build);
@@ -169,6 +178,17 @@ namespace TeamCityExtension
             var response = _httpClient.GetAsync(url).Result;
             var result = response.Content.ReadAsStringAsync().Result;
             return result;
+        }
+
+        public void AddProject(string projectName)
+        {
+            if(!_currentProjects.Contains(projectName))
+                _currentProjects.Add(projectName);
+        }
+
+        public void ClearProjectList()
+        {
+            _currentProjects.Clear();
         }
     }
 }

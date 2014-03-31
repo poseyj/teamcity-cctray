@@ -10,6 +10,7 @@ namespace TeamCityExtension
         public string DisplayName { get; private set; }
         public string Settings { get; set; }
         public BuildServer Configuration { get; set; }
+        private static TeamCityManager _teamCityManager;
 
         public TeamCityExtension()
         {
@@ -24,12 +25,19 @@ namespace TeamCityExtension
 
         public ICruiseProjectManager RetrieveProjectManager(string projectName)
         {
+            _teamCityManager.AddProject(projectName);
             return new TeamCityProjectManager(projectName);
         }
 
         public ICruiseServerManager RetrieveServerManager()
         {
-            return new TeamCityManager(Configuration);
+            if (_teamCityManager == null)
+            {
+                _teamCityManager = new TeamCityManager(Configuration);
+            }
+            _teamCityManager.ClearProjectList();
+            return _teamCityManager;
+            //return new TeamCityManager(Configuration);
         }
 
         public bool Configure(IWin32Window owner)
