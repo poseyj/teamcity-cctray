@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 using Newtonsoft.Json;
 using System;
@@ -45,7 +46,7 @@ namespace TeamCityExtension
 
         public CruiseServerSnapshot GetCruiseServerSnapshot()
         {
-            var projectList = GetBuildList();
+            var projectList = GetBuildList(true);
             var currentlyExecutingBuilds = GetExecutingBuilds();
 
             var projectStatuses = new List<ProjectStatus>();
@@ -59,7 +60,8 @@ namespace TeamCityExtension
                         : IntegrationStatus.Failure,
                     Category = build.Value.buildStatus.ToString(),
                     LastBuildLabel = build.Value.number,
-                    WebURL = build.Value.webUrl
+                    WebURL = build.Value.webUrl,
+                    LastBuildDate = DateTime.ParseExact(build.Value.startDate, "yyyyMMddTHHmmsszzz", CultureInfo.InvariantCulture)
                 };
 
                 projectStatuses.Add(projectStatus);
@@ -106,7 +108,7 @@ namespace TeamCityExtension
             }
         }
 
-        private SortedDictionary<string, TcBuild> GetBuildList()
+        private SortedDictionary<string, TcBuild> GetBuildList(bool watchedOnly)
         {
             var url = BuildFullUrl("/guestAuth/app/rest/builds?locator=branch:(default:any),count:300");
             var result = MakeRequest(url);
@@ -118,7 +120,7 @@ namespace TeamCityExtension
                 var key = string.Format("{0}-[{1}]", build.buildTypeId, build.branchName);
 
                 // if not in our list of currently monitored builds then skip it
-                if(!_currentProjects.Contains(key))
+                if(watchedOnly && !_currentProjects.Contains(key))
                     continue;
 
                 if (!buildList.ContainsKey(key))
@@ -131,7 +133,7 @@ namespace TeamCityExtension
 
         public CCTrayProject[] GetProjectList()
         {
-            var buildList = GetBuildList();
+            var buildList = GetBuildList(false);
             return buildList.Select(build => new CCTrayProject(Configuration.Url, build.Key)).ToArray();
         }
 

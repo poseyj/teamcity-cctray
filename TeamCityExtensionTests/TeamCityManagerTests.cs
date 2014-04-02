@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -50,6 +52,8 @@ namespace TeamCityExtensionTests
             var sosManager = new SirenOfShameManager(mockSiren);
 
             var client = new TeamCityManager(new BuildServer(baseUrl), httpClient, sosManager);
+            client.AddProject("TestApi_Continuous-[feature/auth]");
+
             var result = client.GetCruiseServerSnapshot();
 
             Assert.AreEqual(ProjectActivity.Sleeping, result.ProjectStatuses[0].Activity);
@@ -103,6 +107,8 @@ namespace TeamCityExtensionTests
             var sosManager = new SirenOfShameManager(mockSiren);
 
             var client = new TeamCityManager(new BuildServer(baseUrl), httpClient, sosManager);
+            client.AddProject("TestApi_Continuous-[feature/auth]");
+
             var result = client.GetCruiseServerSnapshot();
 
             Assert.AreEqual(ProjectActivity.Building, result.ProjectStatuses[0].Activity);
@@ -190,6 +196,9 @@ namespace TeamCityExtensionTests
             var httpClient = BuildHttpClient(responses);
 
             var client = new TeamCityManager(new BuildServer(baseUrl), httpClient);
+            client.AddProject("TestApi_Continuous-[feature/auth]");
+            client.AddProject("TestApi_Continuous-[feature/settings]");
+
             var result = client.GetCruiseServerSnapshot();
 
             Assert.AreEqual(2, result.ProjectStatuses.Length);
@@ -200,7 +209,7 @@ namespace TeamCityExtensionTests
         {
             const string baseUrl = "http://server/teamcity";
             const string response1 = "{" +
-                                   "'count': 1," +
+                                   "'count': 2," +
                                    "'nextHref': '/guestAuth/app/rest/builds?locator=count:100,start:100,branch:(default:any)'," +
                                    "'build': [{" +
                                    "'id': 2051," +
@@ -246,6 +255,9 @@ namespace TeamCityExtensionTests
             var httpClient = BuildHttpClient(responses);
 
             var client = new TeamCityManager(new BuildServer(baseUrl), httpClient);
+            client.AddProject("TestApi_Continuous-[feature/auth]");
+            client.AddProject("TestApi_Continuous-[feature/settings]");
+
             var result = client.GetCruiseServerSnapshot();
             
             Assert.AreEqual(2, result.ProjectStatuses.Length);
@@ -264,6 +276,39 @@ namespace TeamCityExtensionTests
             Assert.AreEqual("https://server/teamcity/viewLog.html?buildId=2051&buildTypeId=TestApi_Continuous", result.ProjectStatuses[1].WebURL);
             Assert.AreEqual(ProjectActivity.Sleeping, result.ProjectStatuses[1].Activity);
             Assert.AreEqual("", result.ProjectStatuses[1].CurrentMessage);
+        }
+
+        [TestMethod]
+        public void GetSnapshotShouldPopulateBuildTime()
+        {
+            const string baseUrl = "http://server/teamcity";
+            const string response1 = "{" +
+                                   "'count': 1," +
+                                   "'nextHref': '/guestAuth/app/rest/builds?locator=count:100,start:100,branch:(default:any)'," +
+                                   "'build': [{" +
+                                   "'id': 2051," +
+                                   "'number': '810'," +
+                                   "'status': 'SUCCESS'," +
+                                   "'buildTypeId': 'TestApi_Continuous'," +
+                                   "'branchName': 'feature/settings'," +
+                                   "'startDate': '20140311T170452+0000'," +
+                                   "'href': '/guestAuth/app/rest/builds/id:2051'," +
+                                   "'webUrl': 'https://server/teamcity/viewLog.html?buildId=2051&buildTypeId=TestApi_Continuous'" +
+                                   "}]," +
+                                   "}";
+            const string response2 = "{}";
+
+            var responses = new Stack<string>();
+            responses.Push(response1);
+            responses.Push(response2);
+            var httpClient = BuildHttpClient(responses);
+
+            var client = new TeamCityManager(new BuildServer(baseUrl), httpClient);
+            client.AddProject("TestApi_Continuous-[feature/settings]");
+
+            var result = client.GetCruiseServerSnapshot();
+
+            Assert.AreEqual("3/11/2014 12:04:52 PM", result.ProjectStatuses[0].LastBuildDate.ToString());
         }
 
         #endregion
@@ -449,5 +494,14 @@ namespace TeamCityExtensionTests
         }
 
         #endregion
+
+        [TestMethod]
+        public void ConvertDate()
+        {
+            var dateTime = DateTime.ParseExact(
+                "20140402T145451+0000",
+                "yyyyMMddTHHmmsszzz", CultureInfo.InvariantCulture);
+            Console.Out.WriteLine("dateTime = {0}", dateTime);
+        }
     }
 }

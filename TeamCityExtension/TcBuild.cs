@@ -9,6 +9,7 @@ namespace TeamCityExtension
         public string buildTypeId { get; set; }
         public string percentageComplete { get; set; }
         public string webUrl { get; set; }
+        public string startDate { get; set; }
 
         public BuildStatus buildStatus
         {
